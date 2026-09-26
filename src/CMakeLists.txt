@@ -3,12 +3,13 @@ target_sources(VulkanWorkshop
 	# Source files
 	PRIVATE
 		main.c
+		log.c
 
 	# Header files
 	PRIVATE
 		FILE_SET internalHeaders
 		TYPE HEADERS
 		FILES
-			
+			log.h
 )
 
