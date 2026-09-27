@@ -53,7 +53,7 @@ void setupDebugMessaging(VkInstance instance, VkDebugUtilsMessengerEXT* messenge
 		log_warn("Unable to create primary Vulkan debug messenger\n");
 }
 
-VkDebugUtilsMessengerCreateInfoEXT instanceCreationDebugHook() {
+VkDebugUtilsMessengerCreateInfoEXT instanceCreationDebugHook(void) {
 	return (VkDebugUtilsMessengerCreateInfoEXT){
 		.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
 		.pNext = NULL,

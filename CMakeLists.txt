@@ -2,14 +2,7 @@ cmake_minimum_required(VERSION 4.4.3)
 
 project(VulkanWorkshop)
 
-set(CMAKE_C_FLAGS_DEBUG 
-	-Wall 
-	-Wextra 
-	-Wpedantic 
-	-Wcast-align 
-	-Wconversion
-
-	-glldb)
+set(CMAKE_C_FLAGS_DEBUG "-Wall -Wextra -Wpedantic -Wcast-align -Wconversion -glldb")
 
 # If using Clangd, will play nice
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) 
