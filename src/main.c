@@ -1,4 +1,6 @@
+#include "helpers/vulkanDebug.h"
 #include "helpers/window.h"
+
 
 int main(void) {
 	// --------------------------------------------------
@@ -7,6 +9,13 @@ int main(void) {
 	
 	// Makes sure everything behind it is going to play ball and create a window
 	Window window = windowInit();
+
+	VkInstance instance = NULL;
+	// createInstance();
+	
+	
+	VkDebugUtilsMessengerEXT debugMessenger = NULL;
+	setupDebugMessaging(instance, &debugMessenger);
 
 
 	// --------------------------------------------------

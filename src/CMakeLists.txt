@@ -5,6 +5,7 @@ target_sources(VulkanWorkshop
 		main.c
 		helpers/log.c
 		helpers/window.c
+		helpers/vulkanDebug.c
 
 	# Header files
 	PRIVATE
@@ -13,5 +14,6 @@ target_sources(VulkanWorkshop
 		FILES
 			helpers/log.h
 			helpers/window.h
+			helpers/vulkanDebug.h
 )
 
