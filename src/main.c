@@ -1,26 +1,29 @@
-#include <stdlib.h>
-
-#include <vulkan/vulkan.h>
-#include <GLFW/glfw3.h>
-
-#include "log.h"
+#include "window.h"
 
 int main(void) {
-	if (glfwInit()) {
-		log_ok("GLFW successfully initialized!\n");
-	} else {
-		log_fail("GLFW initialization failed!\n");
-		exit(1);
+	// --------------------------------------------------
+	// Setup of everything needed to render our scene
+	// --------------------------------------------------
+	
+	// Makes sure everything behind it is going to play ball and create a window
+	Window window = windowInit();
+
+
+	// --------------------------------------------------
+	// Primary 'game' loop (logic, rendering, input, etc)
+	// --------------------------------------------------
+	
+	while (windowShouldClose(window)) {
+	
+		// Close events, input, etc
+		windowPollEvents();
 	}
 
-	if (glfwVulkanSupported()) {
-		log_ok("Vulkan is available!\n");
-	} else {
-		log_fail("GLFW cannot find Vulkan or it is unsupported!\n");
-		glfwTerminate();
-		exit(1);
-	}
 
-	glfwTerminate();
+	// --------------------------------------------------
+	// Closing out everything nice and cleanly
+	// --------------------------------------------------
+	
+	windowDestroy(window);
 	return 0;
 }

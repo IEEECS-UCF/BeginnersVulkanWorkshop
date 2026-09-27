@@ -4,6 +4,7 @@ target_sources(VulkanWorkshop
 	PRIVATE
 		main.c
 		log.c
+		window.c
 
 	# Header files
 	PRIVATE
@@ -11,5 +12,6 @@ target_sources(VulkanWorkshop
 		TYPE HEADERS
 		FILES
 			log.h
+			window.h
 )
 
