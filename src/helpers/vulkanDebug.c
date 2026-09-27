@@ -2,16 +2,16 @@
 #include <stdio.h>
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
-#include <vulkan/vulkan_core.h>
 
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback( VkDebugUtilsMessageSeverityFlagBitsEXT severity, VkDebugUtilsMessageTypeFlagBitsEXT type, const VkDebugUtilsMessengerCallbackDataEXT* callbackData, void* userData);
 
 
 void setupDebugMessaging(VkInstance instance, VkDebugUtilsMessengerEXT* messenger) {
-	if (!instance) // For when the instance is undeveloped
+	if (!instance) { // For when the instance is undeveloped
 		log_warn("Instance passed to debug messaging uninitalized\n");
 		return;
+	}
 
 	VkDebugUtilsMessengerCreateInfoEXT createInfo = {
 		.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
@@ -35,6 +35,11 @@ void setupDebugMessaging(VkInstance instance, VkDebugUtilsMessengerEXT* messenge
 			instance,
 			"vkCreateDebugUtilsMessengerEXT"
 	);
+	if (!pfnVkCreateDebugUtilsMessengerEXT) {
+		log_warn("Debug messenger creation fptr is not present, is the layer loaded?\n");
+		return;
+	}
+
 
 	VkResult res = pfnVkCreateDebugUtilsMessengerEXT(
 			instance,
@@ -48,7 +53,7 @@ void setupDebugMessaging(VkInstance instance, VkDebugUtilsMessengerEXT* messenge
 		log_warn("Unable to create primary Vulkan debug messenger\n");
 }
 
-inline VkDebugUtilsMessengerCreateInfoEXT instanceCreationDebugHook() {
+VkDebugUtilsMessengerCreateInfoEXT instanceCreationDebugHook() {
 	return (VkDebugUtilsMessengerCreateInfoEXT){
 		.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
 		.pNext = NULL,
@@ -70,10 +75,10 @@ inline VkDebugUtilsMessengerCreateInfoEXT instanceCreationDebugHook() {
 
 // Index is based off of bitmask spec
 const char* messageTypeStrings[4] = {
-	"\x1b[38;5;129m[GENERAL]",
-	"\x1b[38;5;217m[VALIDATION]",
+	"\x1b[38;5;129m[GENERAL] ",
+	"\x1b[38;5;217m[VALIDATION] ",
 	"",
-	"\x1b[38;5;222m[PERFORMANCE]",
+	"\x1b[38;5;222m[PERFORMANCE] ",
 };
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -86,7 +91,8 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	switch (severity) {
 		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
 		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_FLAG_BITS_MAX_ENUM_EXT:
-			break; // Guarenteed not to be sent to us based on the contract established at creation
+			log_debg("%s\n", callbackData->pMessage);
+			break;
 
 		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
 			log_info("%s\n", callbackData->pMessage);

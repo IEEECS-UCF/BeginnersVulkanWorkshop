@@ -1,5 +1,6 @@
 #include "helpers/vulkanDebug.h"
 #include "helpers/window.h"
+#include "instance.h"
 
 
 int main(void) {
@@ -11,7 +12,7 @@ int main(void) {
 	Window window = windowInit();
 
 	VkInstance instance = NULL;
-	// createInstance();
+	createInstance(&instance);
 	
 	
 	VkDebugUtilsMessengerEXT debugMessenger = NULL;
