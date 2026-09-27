@@ -3,15 +3,15 @@ target_sources(VulkanWorkshop
 	# Source files
 	PRIVATE
 		main.c
-		log.c
-		window.c
+		helpers/log.c
+		helpers/window.c
 
 	# Header files
 	PRIVATE
 		FILE_SET internalHeaders
 		TYPE HEADERS
 		FILES
-			log.h
-			window.h
+			helpers/log.h
+			helpers/window.h
 )
 

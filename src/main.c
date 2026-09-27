@@ -1,4 +1,4 @@
-#include "window.h"
+#include "helpers/window.h"
 
 int main(void) {
 	// --------------------------------------------------
