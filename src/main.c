@@ -1,6 +1,7 @@
 #include "helpers/vulkanDebug.h"
 #include "helpers/window.h"
 #include "instance.h"
+#include "physicalDevice.h"
 
 
 int main(void) {
@@ -17,6 +18,9 @@ int main(void) {
 	
 	VkDebugUtilsMessengerEXT debugMessenger = NULL;
 	setupDebugMessaging(instance, &debugMessenger);
+
+	VkPhysicalDevice physicalDevice;
+	selectPhysicalDevice(instance, &physicalDevice);
 
 
 	// --------------------------------------------------
