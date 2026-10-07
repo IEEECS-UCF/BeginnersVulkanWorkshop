@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-GLFWwindow* windowInit() {
+GLFWwindow* windowInit(void) {
 	if (glfwInit()) {
 		log_debg("GLFW successfully initialized\n");
 	} else {
@@ -35,7 +35,7 @@ GLFWwindow* windowInit() {
 
 inline int windowShouldClose(Window window) {return glfwWindowShouldClose(window);}
 
-inline void windowPollEvents() {glfwPollEvents();}
+inline void windowPollEvents(void) {glfwPollEvents();}
 
 void windowDestroy(GLFWwindow *window) {
 	glfwDestroyWindow(window);

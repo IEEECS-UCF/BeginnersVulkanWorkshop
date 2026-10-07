@@ -7,11 +7,11 @@
 // Just make it more abstract so there's less questions, behaves identically
 typedef GLFWwindow* Window;
 
-Window windowInit();
+Window windowInit(void);
 
 int windowShouldClose(Window window);
 
-void windowPollEvents();
+void windowPollEvents(void);
 
 void windowDestroy(Window window);
 

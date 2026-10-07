@@ -23,11 +23,11 @@ int main(void) {
 	// Primary 'game' loop (logic, rendering, input, etc)
 	// --------------------------------------------------
 	
-	while (windowShouldClose(window)) {
+	/*while (windowShouldClose(window)) {
 	
 		// Close events, input, etc
 		windowPollEvents();
-	}
+	}*/
 
 
 	// --------------------------------------------------

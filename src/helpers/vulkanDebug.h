@@ -6,6 +6,6 @@
 
 void setupDebugMessaging(VkInstance instance, VkDebugUtilsMessengerEXT* messenger);
 
-VkDebugUtilsMessengerCreateInfoEXT instanceCreationDebugHook();
+VkDebugUtilsMessengerCreateInfoEXT instanceCreationDebugHook(void);
 
 #endif
