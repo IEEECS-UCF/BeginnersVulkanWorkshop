@@ -26,9 +26,8 @@ void createInstance(VkInstance* instance) {
 
 
 	// Extensions defined by us to need
-	const char* additionalExtensions[2] = {
+	const char* additionalExtensions[1] = {
 		VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
-		"Bad extension",
 	};
 	uint32_t extensionCount = 0;
 	// GLFW will tell us what extensions are required for the instance to graphically function
