@@ -2,6 +2,7 @@
 #include "GLFW/glfw3.h"
 #include "helpers/log.h"
 #include "helpers/vulkanDebug.h"
+#include "helpers/searching.h"
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -25,20 +26,24 @@ void createInstance(VkInstance* instance) {
 
 
 	// Extensions defined by us to need
-	const char* additionalExtensions[1] = {
+	const char* additionalExtensions[2] = {
 		VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
+		"Bad extension",
 	};
 	uint32_t extensionCount = 0;
 	// GLFW will tell us what extensions are required for the instance to graphically function
 	const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&extensionCount);
-	const char* * extensions = (const char* *)malloc(sizeof(char*) * extensionCount);
+	uint32_t allocCount = extensionCount + (sizeof(additionalExtensions) / sizeof(char*));
+	const char** extensions = (const char* *)malloc(sizeof(char*) * allocCount);
 	assert(extensions != NULL);
 	memcpy((void*)extensions, glfwExtensions, extensionCount * sizeof(char*)); // Move all glfw required extensions into the final array
 	memcpy((void*)(extensions + extensionCount), additionalExtensions, sizeof(additionalExtensions));
-	extensionCount += sizeof(additionalExtensions) / sizeof(char*);
+	extensionCount = allocCount;
 	VkResult resExtensions = validateExtensions(extensionCount, extensions);
- 	if (resExtensions == VK_ERROR_EXTENSION_NOT_PRESENT) // Only condition where a bailout is required
+ 	if (resExtensions == VK_ERROR_EXTENSION_NOT_PRESENT) { // Only condition where a bailout is required
+		free(extensions);
 		return;
+	}
 
 	// Layers defined by us to need in execution
 	const char* layers[1] = {
@@ -46,8 +51,9 @@ void createInstance(VkInstance* instance) {
 	};
 	uint32_t layerCount = sizeof(layers) / sizeof(char*);
 	VkResult resLayers = validateLayers(layerCount, layers);
-	if (resLayers == VK_ERROR_LAYER_NOT_PRESENT)
+	if (resLayers == VK_ERROR_LAYER_NOT_PRESENT) {
 		return;
+	}
 
 
 	// Keep the hook description in the stack for this sole event
@@ -66,6 +72,7 @@ void createInstance(VkInstance* instance) {
 	};
 
 	VkResult res = vkCreateInstance(&createInfo, NULL, instance);
+	free(extensions);
 	if (res != VK_SUCCESS) 
 		log_fail("Couldn't create Vulkan instance");
 	else
@@ -94,22 +101,15 @@ static VkResult validateExtensions(uint32_t count, const char* const* extensions
 	}
 
 
-	for (uint32_t i = 0; i < count; i++) {
-		uint8_t found = 0;
-		for (uint32_t j = 0; j < presentExtensionCount; j++) {
-			if (strcmp(presentExtensions[j].extensionName, extensions[i]) == 0) {
-				found++;
-				// PERF: Could swap current and last to save a few runs, but eh
-				break;
-			}
-		}
-		if (found == 0) {
-			log_fail("Couldn't extension layer \"%s\"\n", extensions[i]);
-			return VK_ERROR_LAYER_NOT_PRESENT;
-		}
+	ExtensionSearchResult searchRes = searchExtensions(presentExtensionCount, presentExtensions, count, extensions);
+	if (searchRes == MISSING_EXTENSIONS) {
+		log_fail("Instance missing required extensions!\n");
+		free(presentExtensions);
+		return VK_ERROR_EXTENSION_NOT_PRESENT;
 	}
 
 
+	free(presentExtensions);
 	log_debg("All extensions validated\n");
 	return res;
 }
@@ -143,12 +143,14 @@ static VkResult validateLayers(uint32_t count, const char** layers) {
 			}
 		}
 		if (found == 0) {
+			free(presentLayers);
 			log_fail("Couldn't validate layer \"%s\"\n", layers[i]);
 			return VK_ERROR_LAYER_NOT_PRESENT;
 		}
 	}
 
 
+	free(presentLayers);
 	log_debg("All layers validated\n");
 	return VK_SUCCESS;
 }

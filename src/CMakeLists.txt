@@ -7,6 +7,8 @@ target_sources(VulkanWorkshop
 		helpers/window.c
 		helpers/vulkanDebug.c
 		instance.c
+		physicalDevice.c
+		helpers/searching.c
 
 	# Header files
 	PRIVATE
@@ -17,5 +19,7 @@ target_sources(VulkanWorkshop
 			helpers/window.h
 			helpers/vulkanDebug.h
 			instance.h
+			physicalDevice.h
+			helpers/searching.h
 )
 
