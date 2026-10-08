@@ -16,7 +16,6 @@ static uint8_t validateDevice(VkPhysicalDevice device);
 
 
 PhysicalResult selectPhysicalDevice(VkInstance instance, VkPhysicalDevice* physicalDevice) {
-
 	uint32_t numDevices = 0;
 	VkPhysicalDevice* devices = NULL;
 	vkEnumeratePhysicalDevices(instance, &numDevices, NULL);

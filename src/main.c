@@ -1,6 +1,7 @@
 #include "helpers/vulkanDebug.h"
 #include "helpers/window.h"
 #include "instance.h"
+#include "logicalDevice.h"
 #include "physicalDevice.h"
 
 
@@ -21,6 +22,11 @@ int main(void) {
 
 	VkPhysicalDevice physicalDevice;
 	selectPhysicalDevice(instance, &physicalDevice);
+
+
+	VkDevice device = NULL;
+	VkQueue graphicsQueue = NULL;
+	createLogicalDevice(physicalDevice, &device, &graphicsQueue);
 
 
 	// --------------------------------------------------

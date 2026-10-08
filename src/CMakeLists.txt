@@ -9,6 +9,7 @@ target_sources(VulkanWorkshop
 		instance.c
 		physicalDevice.c
 		helpers/searching.c
+		logicalDevice.c
 
 	# Header files
 	PRIVATE
@@ -21,5 +22,6 @@ target_sources(VulkanWorkshop
 			instance.h
 			physicalDevice.h
 			helpers/searching.h
+			logicalDevice.h
 )
 
