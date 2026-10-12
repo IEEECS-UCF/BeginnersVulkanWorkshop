@@ -6,7 +6,11 @@
 #include <string.h>
 #include <vulkan/vulkan_core.h>
 
-VkResult createLogicalDevice(VkPhysicalDevice physicalDevice, VkDevice* logicalDevice, VkQueue* graphicsQueue) {
+
+VkBool32 checkSurfaceSupport(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex, VkSurfaceKHR surface);
+
+
+VkResult createLogicalDevice(VkPhysicalDevice physicalDevice, VkDevice* logicalDevice, VkSurfaceKHR surface, VkQueue* graphicsQueue) {
 
 	/// Getting the queue create info ready to feed into the main logical device creation
 	// Fetching queue family info for selection of those that meet our need
@@ -18,7 +22,9 @@ VkResult createLogicalDevice(VkPhysicalDevice physicalDevice, VkDevice* logicalD
 	// Just the first one we can find, guaranteed to be there by physical device creation
 	uint32_t graphicsIndex = 0;
 	for (uint32_t i = 0; i < numQueueFamilyProperties; i++) {
-		if (queueFamilyProperties[i].queueFlags && VK_QUEUE_GRAPHICS_BIT) {
+		if ((queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) &&
+			checkSurfaceSupport(physicalDevice, i, surface)
+		) {
 			graphicsIndex = i;
 			break;
 		}
@@ -93,4 +99,13 @@ VkResult createLogicalDevice(VkPhysicalDevice physicalDevice, VkDevice* logicalD
 
 	free(queueFamilyProperties);
 	return VK_SUCCESS;
+}
+
+VkBool32 checkSurfaceSupport(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex, VkSurfaceKHR surface) {
+	VkBool32 support = VK_FALSE;
+
+	VkResult res = vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, queueFamilyIndex, surface, &support);
+	assert(res == VK_SUCCESS); // I cannot be bothered to do a full check
+
+	return support;
 }

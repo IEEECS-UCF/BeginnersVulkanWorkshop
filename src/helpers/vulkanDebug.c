@@ -85,7 +85,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT severity,
 		VkDebugUtilsMessageTypeFlagBitsEXT type,
 		const VkDebugUtilsMessengerCallbackDataEXT* callbackData,
-		void* userData
+		void* userData 
 ) {
 	fputs(messageTypeStrings[type], stdout);
 	switch (severity) {

@@ -3,6 +3,6 @@
 
 #include <vulkan/vulkan_core.h>
 
-VkResult createLogicalDevice(VkPhysicalDevice physicalDevice, VkDevice* logicalDevice, VkQueue* graphicsQueue);
+VkResult createLogicalDevice(VkPhysicalDevice physicalDevice, VkDevice* logicalDevice, VkSurfaceKHR surface, VkQueue* graphicsQueue);
 
 #endif
