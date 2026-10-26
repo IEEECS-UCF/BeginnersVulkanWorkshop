@@ -10,6 +10,7 @@ target_sources(VulkanWorkshop
 		physicalDevice.c
 		helpers/searching.c
 		logicalDevice.c
+		swapchain.c
 
 	# Header files
 	PRIVATE
@@ -23,5 +24,6 @@ target_sources(VulkanWorkshop
 			physicalDevice.h
 			helpers/searching.h
 			logicalDevice.h
+			swapchain.h
 )
 

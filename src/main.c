@@ -4,6 +4,7 @@
 #include "logicalDevice.h"
 #include "physicalDevice.h"
 #include "helpers/log.h"
+#include "swapchain.h"
 #include <vulkan/vk_platform.h>
 
 
@@ -45,6 +46,9 @@ int main(void) {
 	createLogicalDevice(physicalDevice, &device, surface, &graphicsQueue);
 
 
+	//
+	Swapchain swapchain;
+	createSwapchain(physicalDevice, device, surface, window, &swapchain);
 
 	// --------------------------------------------------
 	// Primary 'game' loop (logic, rendering, input, etc)
