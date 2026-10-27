@@ -65,15 +65,50 @@ SwapchainResult createSwapchain(VkPhysicalDevice physicalDevice, VkDevice logica
 	};
 
 	vkCreateSwapchainKHR(logicalDevice, &createInfo, NULL, &(swapchain->handle));
-	vkGetSwapchainImagesKHR(logicalDevice, swapchain->handle, &(swapchain->numImages), NULL);
-	swapchain->images = (VkImage*)malloc(sizeof(VkImage) * swapchain->numImages);
-	assert(swapchain->images != NULL);
-	vkGetSwapchainImagesKHR(logicalDevice, swapchain->handle, &(swapchain->numImages), swapchain->images);
+	vkGetSwapchainImagesKHR(logicalDevice, swapchain->handle, &(swapchain->images.num), NULL);
+	swapchain->images.imageHandles = (VkImage*)malloc(sizeof(VkImage) * swapchain->images.num);
+	assert(swapchain->images.imageHandles != NULL);
+	vkGetSwapchainImagesKHR(logicalDevice, swapchain->handle, &(swapchain->images.num), swapchain->images.imageHandles);
 
 	free(surfaceFormats); surfaceFormats = NULL;
 	free(surfacePresentModes); surfacePresentModes = NULL;
 
 	log_ok("Initial swapchain has been created\n");
+
+	return SWAPCHAIN_SUCCESS;
+}
+
+SwapchainResult createImageViews(VkDevice device, Swapchain* swapchain) {
+	VkImageViewCreateInfo createInfo = {
+		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+		.pNext = NULL,
+		.flags = 0,
+		.format = swapchain->surfaceFormat.format,
+		.subresourceRange = (VkImageSubresourceRange){
+			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT, 
+			.levelCount = 1, 
+			.layerCount = 1, 
+			.baseArrayLayer = 0, 
+			.baseMipLevel = 0
+		},
+		.components = { // Make sure were just leaving color channels as they should be, but many a funny available here
+			.r = VK_COMPONENT_SWIZZLE_IDENTITY, 
+			.g = VK_COMPONENT_SWIZZLE_IDENTITY, 
+			.b = VK_COMPONENT_SWIZZLE_IDENTITY, 
+			.a = VK_COMPONENT_SWIZZLE_IDENTITY,
+		},
+		.viewType = VK_IMAGE_VIEW_TYPE_2D
+	};
+
+	swapchain->images.viewHandles = (VkImageView*)malloc(sizeof(VkImageView) * swapchain->images.num);
+	assert(swapchain->images.imageHandles != NULL);
+	
+	for (uint32_t i = 0; i < swapchain->images.num; i++) {
+		createInfo.image = swapchain->images.imageHandles[i];
+		vkCreateImageView(device, &createInfo, NULL, &(swapchain->images.viewHandles[i]));
+	}
+
+	log_ok("Swapchain image views have been created\n");
 
 	return SWAPCHAIN_SUCCESS;
 }

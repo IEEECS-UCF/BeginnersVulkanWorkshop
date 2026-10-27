@@ -6,6 +6,7 @@
 #include "helpers/log.h"
 #include "swapchain.h"
 #include <vulkan/vk_platform.h>
+#include <vulkan/vulkan_core.h>
 
 
 void destroyAll(GLFWwindow* window, VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, VkDevice logicalDevice, VkSurfaceKHR surface);
@@ -49,6 +50,7 @@ int main(void) {
 	//
 	Swapchain swapchain;
 	createSwapchain(physicalDevice, device, surface, window, &swapchain);
+	createImageViews(device, &swapchain);
 
 	// --------------------------------------------------
 	// Primary 'game' loop (logic, rendering, input, etc)

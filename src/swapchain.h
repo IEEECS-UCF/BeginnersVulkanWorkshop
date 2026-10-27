@@ -11,14 +11,23 @@ typedef enum {
 	SWAPCHAIN_NOT_ENOUGH_SURFACE_FORMATS,
 } SwapchainResult;
 
+// Maybe move this and similar data structures into a different header file
+typedef struct {
+	uint32_t num;
+	VkImage* imageHandles;
+	VkImageView* viewHandles;
+} ImageArrayList;
+
 typedef struct {
 	VkSwapchainKHR handle;
-	VkImage* images;
-	uint32_t numImages;
+	ImageArrayList images;
 	VkSurfaceFormatKHR surfaceFormat;
 	VkExtent2D extent;
 } Swapchain;
 
+
 SwapchainResult createSwapchain(VkPhysicalDevice physicalDevice, VkDevice logicalDevice, VkSurfaceKHR surface, GLFWwindow* window, Swapchain* swapchain);
+
+SwapchainResult createImageViews(VkDevice device, Swapchain* swapchain);
 
 #endif
