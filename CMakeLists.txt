@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 4.4.3)
+include(cmake/SlangCompile.cmake)
 
 project(VulkanWorkshop)
 
@@ -19,11 +20,15 @@ add_subdirectory(libs/GLFW)
 
 add_executable(VulkanWorkshop)
 
+compile_slang_shaders(
+	TARGET VulkanWorkshop
+	SOURCES tri.slang
+	ENTRYPOINTS vertMain fragMain
+)
 
 # Folds in source files for building,
 # adding new files must be done at the 'src' level CMakeLists
 add_subdirectory(src)
-
 
 target_include_directories(VulkanWorkshop 
 	PRIVATE 

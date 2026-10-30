@@ -1,3 +1,4 @@
+#include "graphicsPipeline.h"
 #include "helpers/vulkanDebug.h"
 #include "helpers/window.h"
 #include "instance.h"
@@ -5,11 +6,12 @@
 #include "physicalDevice.h"
 #include "helpers/log.h"
 #include "swapchain.h"
+#include <stdlib.h>
 #include <vulkan/vk_platform.h>
 #include <vulkan/vulkan_core.h>
 
 
-void destroyAll(GLFWwindow* window, VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, VkDevice logicalDevice, VkSurfaceKHR surface);
+static void destroyAll(GLFWwindow* window, VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, VkDevice logicalDevice, VkSurfaceKHR surface);
 
 
 int main(void) {
@@ -52,6 +54,11 @@ int main(void) {
 	createSwapchain(physicalDevice, device, surface, window, &swapchain);
 	createImageViews(device, &swapchain);
 
+
+	//
+	//createGraphicsPipeline();
+	createGraphicsPipeline(device, &swapchain);
+
 	// --------------------------------------------------
 	// Primary 'game' loop (logic, rendering, input, etc)
 	// --------------------------------------------------
@@ -72,7 +79,7 @@ int main(void) {
 }
 
 
-void destroyAll(GLFWwindow* window, VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, VkDevice logicalDevice, VkSurfaceKHR surface) {
+static void destroyAll(GLFWwindow* window, VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, VkDevice logicalDevice, VkSurfaceKHR surface) {
 	if (surface != NULL)
 		vkDestroySurfaceKHR(instance, surface, NULL);
 	if (logicalDevice != NULL)

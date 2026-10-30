@@ -11,6 +11,8 @@ target_sources(VulkanWorkshop
 		helpers/searching.c
 		logicalDevice.c
 		swapchain.c
+		helpers/fileio.c
+		graphicsPipeline.c
 
 	# Header files
 	PRIVATE
@@ -25,5 +27,7 @@ target_sources(VulkanWorkshop
 			helpers/searching.h
 			logicalDevice.h
 			swapchain.h
+			helpers/fileio.h
+			graphicsPipeline.h
 )
 

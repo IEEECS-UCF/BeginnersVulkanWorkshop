@@ -11,7 +11,7 @@ typedef enum {
 	SWAPCHAIN_NOT_ENOUGH_SURFACE_FORMATS,
 } SwapchainResult;
 
-// Maybe move this and similar data structures into a different header file
+// NOTE: Maybe move this and similar data structures into a different header file
 typedef struct {
 	uint32_t num;
 	VkImage* imageHandles;
