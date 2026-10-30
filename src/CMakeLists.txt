@@ -13,6 +13,7 @@ target_sources(VulkanWorkshop
 		swapchain.c
 		helpers/fileio.c
 		graphicsPipeline.c
+		commandBuffer.c
 
 	# Header files
 	PRIVATE
@@ -29,5 +30,6 @@ target_sources(VulkanWorkshop
 			swapchain.h
 			helpers/fileio.h
 			graphicsPipeline.h
+			commandBuffer.h
 )
 

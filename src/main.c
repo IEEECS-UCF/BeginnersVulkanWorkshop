@@ -1,3 +1,4 @@
+#include "commandBuffer.h"
 #include "graphicsPipeline.h"
 #include "helpers/vulkanDebug.h"
 #include "helpers/window.h"
@@ -46,7 +47,8 @@ int main(void) {
 
 	VkDevice device = NULL;
 	VkQueue graphicsQueue = NULL; // _technically_ also a present queue, but in our specific use case this is quibble
-	createLogicalDevice(physicalDevice, &device, surface, &graphicsQueue);
+	uint32_t graphicsQueueIndex = 0;
+	createLogicalDevice(physicalDevice, &device, surface, &graphicsQueue, &graphicsQueueIndex);
 
 
 	//
@@ -56,8 +58,10 @@ int main(void) {
 
 
 	//
-	//createGraphicsPipeline();
 	createGraphicsPipeline(device, &swapchain);
+
+	VkCommandPool commandPool = NULL;
+	createCommandPool(device, graphicsQueueIndex, &commandPool);
 
 	// --------------------------------------------------
 	// Primary 'game' loop (logic, rendering, input, etc)

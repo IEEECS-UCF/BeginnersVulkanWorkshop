@@ -10,7 +10,7 @@
 VkBool32 checkSurfaceSupport(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex, VkSurfaceKHR surface);
 
 
-VkResult createLogicalDevice(VkPhysicalDevice physicalDevice, VkDevice* logicalDevice, VkSurfaceKHR surface, VkQueue* graphicsQueue) {
+VkResult createLogicalDevice(VkPhysicalDevice physicalDevice, VkDevice* logicalDevice, VkSurfaceKHR surface, VkQueue* graphicsQueue, uint32_t* graphicsQueueIndex) {
 
 	/// Getting the queue create info ready to feed into the main logical device creation
 	// Fetching queue family info for selection of those that meet our need
@@ -40,6 +40,7 @@ VkResult createLogicalDevice(VkPhysicalDevice physicalDevice, VkDevice* logicalD
 		.queueCount = 1,
 		.pQueuePriorities = &prority, // Expects an array, so pass one as a pointer
 	};
+	*graphicsQueueIndex = graphicsIndex;
 
 
 	/// Opting into specific features of the physical device so they are available according to the logical device
