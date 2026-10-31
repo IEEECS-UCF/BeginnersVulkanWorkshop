@@ -63,6 +63,9 @@ int main(void) {
 	VkCommandPool commandPool = NULL;
 	createCommandPool(device, graphicsQueueIndex, &commandPool);
 
+	VkCommandBuffer commandBuffer = NULL;
+	createCommandBuffer(device, commandPool, &commandBuffer);
+
 	// --------------------------------------------------
 	// Primary 'game' loop (logic, rendering, input, etc)
 	// --------------------------------------------------
