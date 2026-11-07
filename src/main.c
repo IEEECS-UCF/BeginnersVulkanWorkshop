@@ -1,6 +1,8 @@
+#include <unistd.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include "draw.h"
 #include "commandBuffer.h"
 #include "graphicsPipeline.h"
 #include "helpers/vulkanDebug.h"
@@ -72,22 +74,28 @@ int main(void) {
 	createCommandBuffer(device, commandPool, &commandBuffer);
 	//recordCommandBuffer(commandBuffer, swapchain, 0, graphicsPipeline);
 
+
+	// Setup synchronization objects
+	SyncObjects sync = EMPTY_SYNC_OBJECTS;
+	createSynchronizationObjects(device, &sync);
+	
 	// --------------------------------------------------
 	// Primary 'game' loop (logic, rendering, input, etc)
 	// --------------------------------------------------
 	
-	/*while (windowShouldClose(window)) {
+	while (!windowShouldClose(window)) {
 	
 		// Close events, input, etc
 		windowPollEvents();
-	}*/
+		drawFrame(device, &sync, swapchain, commandBuffer, graphicsQueue, graphicsPipeline);
+	}
 
 
 	// --------------------------------------------------
 	// Closing out everything nice and cleanly
 	// --------------------------------------------------
 	
-	vkDeviceWaitIdle(device);
+	vkDeviceWaitIdle(device); // Ensure work has completed so we're not bailing out mid-GPU-operation
 	destroyAll(window, instance, debugMessenger, device, surface);
 	return 0;
 }

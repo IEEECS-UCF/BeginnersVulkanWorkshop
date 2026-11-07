@@ -192,7 +192,6 @@ CommandBufResult recordCommandBuffer(VkCommandBuffer commandBuffer, Swapchain sw
 		return COMMAND_BUFFER_END_FAIL;
 	}
 
-	log_debg("Recorded command buffer\n");
 	return COMMAND_BUFFER_SUCCESS;
 }
 

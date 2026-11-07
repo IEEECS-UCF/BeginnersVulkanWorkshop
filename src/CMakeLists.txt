@@ -14,6 +14,7 @@ target_sources(VulkanWorkshop
 		helpers/fileio.c
 		graphicsPipeline.c
 		commandBuffer.c
+		draw.c
 
 	# Header files
 	PRIVATE
@@ -31,5 +32,6 @@ target_sources(VulkanWorkshop
 			helpers/fileio.h
 			graphicsPipeline.h
 			commandBuffer.h
+			draw.h
 )
 
