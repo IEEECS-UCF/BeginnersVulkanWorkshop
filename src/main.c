@@ -1,3 +1,6 @@
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
 #include "commandBuffer.h"
 #include "graphicsPipeline.h"
 #include "helpers/vulkanDebug.h"
@@ -10,6 +13,7 @@
 #include <stdlib.h>
 #include <vulkan/vk_platform.h>
 #include <vulkan/vulkan_core.h>
+
 
 
 static void destroyAll(GLFWwindow* window, VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, VkDevice logicalDevice, VkSurfaceKHR surface);
@@ -58,13 +62,15 @@ int main(void) {
 
 
 	//
-	createGraphicsPipeline(device, &swapchain);
+	VkPipeline graphicsPipeline = NULL;
+	createGraphicsPipeline(device, &swapchain, &graphicsPipeline);
 
 	VkCommandPool commandPool = NULL;
 	createCommandPool(device, graphicsQueueIndex, &commandPool);
 
 	VkCommandBuffer commandBuffer = NULL;
 	createCommandBuffer(device, commandPool, &commandBuffer);
+	//recordCommandBuffer(commandBuffer, swapchain, 0, graphicsPipeline);
 
 	// --------------------------------------------------
 	// Primary 'game' loop (logic, rendering, input, etc)
@@ -81,6 +87,7 @@ int main(void) {
 	// Closing out everything nice and cleanly
 	// --------------------------------------------------
 	
+	vkDeviceWaitIdle(device);
 	destroyAll(window, instance, debugMessenger, device, surface);
 	return 0;
 }

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <vulkan/vulkan_core.h>
 
-GraphicsPipelineResult createGraphicsPipeline(VkDevice device, Swapchain* swapchain) {
+GraphicsPipelineResult createGraphicsPipeline(VkDevice device, Swapchain* swapchain, VkPipeline* graphicsPipeline) {
 	size_t bytecodeSize = 0;
 	uint32_t* bytecode = readShaderBytecode("shaders/byte/tri.spv", &bytecodeSize);
 
@@ -166,8 +166,7 @@ GraphicsPipelineResult createGraphicsPipeline(VkDevice device, Swapchain* swapch
 	};
 
 
-	VkPipeline graphicsPipeline = NULL;
-	vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, NULL, &graphicsPipeline);
+	vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, NULL, graphicsPipeline);
 
 	log_ok("Graphics pipeline has been created\n");
 	return GRAPHICS_PIPELINE_SUCCESS;

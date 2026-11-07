@@ -9,7 +9,7 @@ typedef enum {
 } GraphicsPipelineResult;
 
 
-GraphicsPipelineResult createGraphicsPipeline(VkDevice device, Swapchain* swapchain);
+GraphicsPipelineResult createGraphicsPipeline(VkDevice device, Swapchain* swapchain, VkPipeline* graphicsPipeline);
 
 
 #endif

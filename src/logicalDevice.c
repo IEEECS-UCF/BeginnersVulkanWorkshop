@@ -51,9 +51,10 @@ VkResult createLogicalDevice(VkPhysicalDevice physicalDevice, VkDevice* logicalD
 	deviceDynamicFeatures.pNext = NULL;
 	// Makes writing command queues and pipelines infinitely easier (less rewritten code)
 	VkPhysicalDeviceVulkan13Features device13Features;
-	memset(&device13Features, 0, sizeof(VkPhysicalDeviceVulkan13Features));
+	memset(&device13Features, VK_FALSE, sizeof(VkPhysicalDeviceVulkan13Features));
 	device13Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
 	device13Features.dynamicRendering = VK_TRUE;
+	device13Features.synchronization2 = VK_TRUE;
 	device13Features.pNext = &deviceDynamicFeatures;
 	// Eases shader writing
 	VkPhysicalDeviceVulkan11Features device11Features;
