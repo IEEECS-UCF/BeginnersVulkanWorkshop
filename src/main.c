@@ -13,7 +13,7 @@
 #include "swapchain.h"
 
 
-static void destroyAll(Window window, VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, VkDevice logicalDevice, VkSurfaceKHR surface);
+static void destroyAll(Window window, VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, VkDevice logicalDevice, VkSurfaceKHR surface, Swapchain swapchain);
 
 
 int main(void) {
@@ -36,7 +36,7 @@ int main(void) {
 	VkSurfaceKHR surface = NULL;
 	if (window && instance && glfwCreateWindowSurface(instance, window, NULL, &surface) != 0) {
 		log_fail("Cannot create window surface\n");
-		destroyAll(window, instance, debugMessenger, NULL, surface);
+		destroyAll(window, instance, debugMessenger, NULL, surface, EMPTY_SWAPCHAIN_OBJECT);
 		return -1;
 	}
 
@@ -71,11 +71,21 @@ int main(void) {
 	// Closing out everything nice and cleanly
 	// --------------------------------------------------
 	
-	destroyAll(window, instance, debugMessenger, device, surface);
+	destroyAll(window, instance, debugMessenger, device, surface, swapchain);
 	return 0;
 }
 
-static void destroyAll(GLFWwindow* window, VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, VkDevice logicalDevice, VkSurfaceKHR surface) {
+
+static void destroyAll(GLFWwindow* window, VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, VkDevice logicalDevice, VkSurfaceKHR surface, Swapchain swapchain) {
+	if (swapchain.images.imageHandles != NULL) {
+		// Images are destroyed with the swapchain, so no destroying them here
+		for (uint32_t i = 0; i < swapchain.images.num; i++) {
+			vkDestroyImageView(logicalDevice, swapchain.images.viewHandles[i], NULL);
+		}
+	}
+	if (swapchain.handle != NULL) {
+		vkDestroySwapchainKHR(logicalDevice, swapchain.handle, NULL);
+	}
 	if (surface != NULL)
 		vkDestroySurfaceKHR(instance, surface, NULL);
 	if (logicalDevice != NULL)
