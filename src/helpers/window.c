@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-GLFWwindow* windowInit() {
+GLFWwindow* windowInit(void) {
 	if (glfwInit()) {
 		log_debg("GLFW successfully initialized\n");
 	} else {
@@ -20,7 +20,7 @@ GLFWwindow* windowInit() {
 	}
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
 	GLFWwindow* window = glfwCreateWindow(800, 600, "Vulkanization!", NULL, NULL);
 	if (!window) {
@@ -35,7 +35,7 @@ GLFWwindow* windowInit() {
 
 inline int windowShouldClose(Window window) {return glfwWindowShouldClose(window);}
 
-inline void windowPollEvents() {glfwPollEvents();}
+inline void windowPollEvents(void) {glfwPollEvents();}
 
 void windowDestroy(GLFWwindow *window) {
 	glfwDestroyWindow(window);
