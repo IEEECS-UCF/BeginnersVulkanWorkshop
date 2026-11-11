@@ -26,16 +26,16 @@ If you care, the commands do, in order: create a local copy of this project in t
 ### C Compiler
 Some form of on device C compiler will be __required__ for this workshop, an online one is not adequate. I highly reccomend either GCC or Clang.
 #### Windows
-Windows has its own C compiler MSVC, but due to a myriad of reasons it has not been tested for compatability with this workshop. My preffered method of aquiring a C compiler on windows is through a tool called msys2, which will allow local running of the commands (WSL2 is not an option here). Many an online tutorial exists for installing it and a compiler, so find whichever takes your fancy.
+Windows has its own C compiler MSVC, but due to a myriad of reasons it has not been tested for compatability with this workshop. My preffered method of aquiring a C compiler on windows is through a tool called [MSYS2](https://www.msys2.org), which will allow local running of the commands (WSL2 is not an option here). Many an online tutorial exists for installing it and a compiler, so find whichever takes your fancy.
 #### Linux
 Both compilers are likely available through your distriubutions preffered package manager, please consult it's documentation on proper installation.
 
 ### CMake
-CMake is a tool for organizing the compiling of large C/C++ projects, install instructions are similar to that of your C compiler, msys for Windows, package manager for Linux.  
+CMake is a tool for organizing the compiling of large C/C++ projects, install instructions are similar to that of your C compiler, [MSYS2](https://www.msys2.org/docs/cmake/) for Windows, package manager for Linux.  
 __Needed commands are here (if your editor environemnt doesn't handle CMake itself), at the directory where you git clone'd__
 ```
 mkdir build
-cmake -DCMAKE_BUILD_DEBUG -B build
+cmake -G [your installed generator] -DCMAKE_BUILD_DEBUG -B build
 ```
 If you want to take it on a test ride (which I reccomend to make sure everyhting has worked [Install Vulkan first!]), do this
 ```
