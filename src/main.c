@@ -13,9 +13,14 @@
 #include "physicalDevice.h"
 #include "logicalDevice.h"
 #include "swapchain.h"
+#include "commandBuffer.h"
+#include "draw.h"
 
 
-static void destroyAll(Window window, VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, VkDevice logicalDevice, VkSurfaceKHR surface, Swapchain swapchain, GraphicsPipeline pipeline);
+static void destroyAll(
+	Window window, VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, 
+	VkDevice logicalDevice, VkSurfaceKHR surface, Swapchain swapchain, 
+	GraphicsPipeline pipeline, VkCommandPool commandPool, SyncObjects sync);
 
 
 int main(void) {
@@ -38,7 +43,7 @@ int main(void) {
 	VkSurfaceKHR surface = NULL;
 	if (window && instance && glfwCreateWindowSurface(instance, window, NULL, &surface) != 0) {
 		log_fail("Cannot create window surface\n");
-		destroyAll(window, instance, debugMessenger, NULL, surface, EMPTY_SWAPCHAIN_OBJECT, EMPTY_PIPELINE_OBJECT);
+		destroyAll(window, instance, debugMessenger, NULL, surface, EMPTY_SWAPCHAIN_OBJECT, EMPTY_PIPELINE_OBJECT, NULL, EMPTY_SYNC_OBJECTS);
 		return -1;
 	}
 
@@ -63,14 +68,27 @@ int main(void) {
 	if (gpr != GRAPHICS_PIPELINE_SUCCESS && gpr != GRAPHICS_PIPELINE_INPUTS_UNINITIALIZED) { return EXIT_FAILURE; }
 
 
+	VkCommandPool commandPool = NULL;
+	createCommandPool(device, graphicsQueueIndex, &commandPool);
+
+
+	VkCommandBuffer commandBuffer = NULL;
+	createCommandBuffer(device, commandPool, &commandBuffer);
+
+
+	SyncObjects sync = EMPTY_SYNC_OBJECTS;
+	createSynchronizationObjects(device, &sync, swapchain.images.num);
+
 	// --------------------------------------------------
 	// Primary 'game' loop (logic, rendering, input, etc)
 	// --------------------------------------------------
 	
-	while (windowShouldClose(window)) {
-	
+	while (!windowShouldClose(window)) {
+		//drawFrame(device, &sync, swapchain, commandBuffer, graphicsQueue, graphicsPipeline.handle);
+
 		// Close events, input, etc
 		windowPollEvents();
+		drawFrame(device, &sync, swapchain, commandBuffer, graphicsQueue, graphicsPipeline.handle);
 	}
 
 
@@ -78,7 +96,8 @@ int main(void) {
 	// Closing out everything nice and cleanly
 	// --------------------------------------------------
 	
-	destroyAll(window, instance, debugMessenger, device, surface, swapchain, graphicsPipeline);
+	vkDeviceWaitIdle(device); // Ensure work has completed so we're not bailing out mid-GPU-operation
+	destroyAll(window, instance, debugMessenger, device, surface, swapchain, graphicsPipeline, commandPool, sync);
 	return 0;
 }
 
@@ -90,8 +109,21 @@ static void destroyAll(
 	VkDevice logicalDevice, 
 	VkSurfaceKHR surface, 
 	Swapchain swapchain,
-	GraphicsPipeline pipeline
+	GraphicsPipeline pipeline,
+	VkCommandPool commandPool,
+	SyncObjects sync
 ) {
+	if (sync.drawFence != NULL) {
+		vkDestroyFence(logicalDevice, sync.drawFence, NULL);
+		vkDestroySemaphore(logicalDevice, sync.presentComplete, NULL);
+		for (uint32_t i = 0; i < swapchain.images.num; i++) {
+			vkDestroySemaphore(logicalDevice, sync.renderComplete[i], NULL);
+		}
+	}
+
+	if (commandPool != NULL)
+		vkDestroyCommandPool(logicalDevice, commandPool, NULL);
+
 	if (pipeline.shaderModule)
 		vkDestroyShaderModule(logicalDevice, pipeline.shaderModule, NULL);
 

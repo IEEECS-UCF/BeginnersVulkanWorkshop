@@ -3,16 +3,20 @@
 #include "helpers/log.h"
 #include <assert.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <vulkan/vulkan_core.h>
 
-void createSynchronizationObjects(VkDevice device, SyncObjects *objects) {
+void createSynchronizationObjects(VkDevice device, SyncObjects *objects, uint32_t numImages) {
 	VkSemaphoreCreateInfo createInfo = {
 		.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
 		.pNext = NULL,
 		.flags = 0,
 	};
 	vkCreateSemaphore(device, &createInfo, NULL, &(objects->presentComplete));
-	vkCreateSemaphore(device, &createInfo, NULL, &(objects->renderComplete));
+	objects->renderComplete = malloc(sizeof(VkSemaphore) * numImages);
+	for (uint32_t i = 0; i < numImages; i++) {
+		vkCreateSemaphore(device, &createInfo, NULL, &(objects->renderComplete[i]));
+	}
 
 
 	// The underlying datastructure has an identical memory footprint, so why waste resources
@@ -33,17 +37,19 @@ void drawFrame(VkDevice device, SyncObjects *sync, Swapchain swapchain, VkComman
 	vkResetCommandBuffer(commandBuffer, 0);
 	recordCommandBuffer(commandBuffer, swapchain, imageIndex, graphicsPipeline);
 
-	VkPipelineStageFlags stageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	VkPipelineStageFlags stageFlags[1] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+	VkSemaphore waitSemaphores[1] = {sync->presentComplete};
+	VkSemaphore signalSemaphore[1] = {sync->renderComplete[imageIndex]};
 	VkSubmitInfo submitInfo = {
 		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
 		.pNext = NULL,
 		.waitSemaphoreCount = 1,
-		.pWaitSemaphores = &(sync->presentComplete),
-		.pWaitDstStageMask = &stageFlags,
+		.pWaitSemaphores = waitSemaphores,
+		.pWaitDstStageMask = stageFlags,
 		.commandBufferCount = 1,
 		.pCommandBuffers = &commandBuffer,
 		.signalSemaphoreCount = 1,
-		.pSignalSemaphores = &(sync->renderComplete)
+		.pSignalSemaphores = signalSemaphore
 	};
 	vkQueueSubmit(graphicsQueue, 1, &submitInfo, sync->drawFence);
 
@@ -51,7 +57,7 @@ void drawFrame(VkDevice device, SyncObjects *sync, Swapchain swapchain, VkComman
 		.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
 		.pNext = NULL,
 		.waitSemaphoreCount = 1,
-		.pWaitSemaphores = &(sync->renderComplete),
+		.pWaitSemaphores = signalSemaphore,
 		.swapchainCount = 1,
 		.pSwapchains = &swapchain.handle,
 		.pImageIndices = &imageIndex,
