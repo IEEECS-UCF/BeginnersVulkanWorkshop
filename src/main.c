@@ -1,5 +1,7 @@
 // General purpose imports
+#include "graphicsPipeline.h"
 #include <stdint.h>
+#include <stdlib.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include "helpers/log.h"
@@ -13,7 +15,7 @@
 #include "swapchain.h"
 
 
-static void destroyAll(Window window, VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, VkDevice logicalDevice, VkSurfaceKHR surface, Swapchain swapchain);
+static void destroyAll(Window window, VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, VkDevice logicalDevice, VkSurfaceKHR surface, Swapchain swapchain, GraphicsPipeline pipeline);
 
 
 int main(void) {
@@ -36,7 +38,7 @@ int main(void) {
 	VkSurfaceKHR surface = NULL;
 	if (window && instance && glfwCreateWindowSurface(instance, window, NULL, &surface) != 0) {
 		log_fail("Cannot create window surface\n");
-		destroyAll(window, instance, debugMessenger, NULL, surface, EMPTY_SWAPCHAIN_OBJECT);
+		destroyAll(window, instance, debugMessenger, NULL, surface, EMPTY_SWAPCHAIN_OBJECT, EMPTY_PIPELINE_OBJECT);
 		return -1;
 	}
 
@@ -56,6 +58,11 @@ int main(void) {
 	createImageViews(device, &swapchain);
 
 
+	GraphicsPipeline graphicsPipeline = EMPTY_PIPELINE_OBJECT;
+	GraphicsPipelineResult gpr = createGraphicsPipeline(device, &swapchain, &graphicsPipeline);
+	if (gpr != GRAPHICS_PIPELINE_SUCCESS && gpr != GRAPHICS_PIPELINE_INPUTS_UNINITIALIZED) { return EXIT_FAILURE; }
+
+
 	// --------------------------------------------------
 	// Primary 'game' loop (logic, rendering, input, etc)
 	// --------------------------------------------------
@@ -71,23 +78,42 @@ int main(void) {
 	// Closing out everything nice and cleanly
 	// --------------------------------------------------
 	
-	destroyAll(window, instance, debugMessenger, device, surface, swapchain);
+	destroyAll(window, instance, debugMessenger, device, surface, swapchain, graphicsPipeline);
 	return 0;
 }
 
 
-static void destroyAll(GLFWwindow* window, VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, VkDevice logicalDevice, VkSurfaceKHR surface, Swapchain swapchain) {
+static void destroyAll(
+	GLFWwindow* window, 
+	VkInstance instance, 
+	VkDebugUtilsMessengerEXT debugMessenger, 
+	VkDevice logicalDevice, 
+	VkSurfaceKHR surface, 
+	Swapchain swapchain,
+	GraphicsPipeline pipeline
+) {
+	if (pipeline.shaderModule)
+		vkDestroyShaderModule(logicalDevice, pipeline.shaderModule, NULL);
+
+	if (pipeline.layout != NULL) 
+		vkDestroyPipelineLayout(logicalDevice, pipeline.layout, NULL);
+
+	if (pipeline.handle != NULL) 
+		vkDestroyPipeline(logicalDevice, pipeline.handle, NULL);
+
 	if (swapchain.images.imageHandles != NULL) {
 		// Images are destroyed with the swapchain, so no destroying them here
 		for (uint32_t i = 0; i < swapchain.images.num; i++) {
 			vkDestroyImageView(logicalDevice, swapchain.images.viewHandles[i], NULL);
 		}
 	}
-	if (swapchain.handle != NULL) {
+
+	if (swapchain.handle != NULL) 
 		vkDestroySwapchainKHR(logicalDevice, swapchain.handle, NULL);
-	}
+
 	if (surface != NULL)
 		vkDestroySurfaceKHR(instance, surface, NULL);
+
 	if (logicalDevice != NULL)
 		vkDestroyDevice(logicalDevice, NULL);
 	
