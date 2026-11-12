@@ -2,7 +2,6 @@
 #include "helpers/fileio.h"
 #include "helpers/log.h"
 #include <stdlib.h>
-#include <vulkan/vulkan_core.h>
 
 void createGraphicsPipeline(VkDevice device, Swapchain* swapchain, GraphicsPipeline* pipeline) {
 	// Guard for when progress has not reached this point
