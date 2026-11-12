@@ -64,8 +64,7 @@ int main(void) {
 
 
 	GraphicsPipeline graphicsPipeline = EMPTY_PIPELINE_OBJECT;
-	GraphicsPipelineResult gpr = createGraphicsPipeline(device, &swapchain, &graphicsPipeline);
-	if (gpr != GRAPHICS_PIPELINE_SUCCESS && gpr != GRAPHICS_PIPELINE_INPUTS_UNINITIALIZED) { return EXIT_FAILURE; }
+	createGraphicsPipeline(device, &swapchain, &graphicsPipeline);
 
 
 	VkCommandPool commandPool = NULL;

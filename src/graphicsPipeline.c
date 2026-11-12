@@ -4,15 +4,13 @@
 #include <stdlib.h>
 #include <vulkan/vulkan_core.h>
 
-GraphicsPipelineResult createGraphicsPipeline(VkDevice device, Swapchain* swapchain, GraphicsPipeline* pipeline) {
+void createGraphicsPipeline(VkDevice device, Swapchain* swapchain, GraphicsPipeline* pipeline) {
 	// Guard for when progress has not reached this point
-	if (device == NULL || swapchain->handle == NULL) { return GRAPHICS_PIPELINE_INPUTS_UNINITIALIZED; }
+	if (device == NULL || swapchain->handle == NULL) { return; }
 
 
 	size_t bytecodeSize = 0;
 	uint32_t* bytecode = readShaderBytecode("shaders/byte/tri.spv", &bytecodeSize);
-	if (bytecode == NULL)
-		return GRAPHICS_PIPELINE_FAILURE;
 
 	const VkShaderModuleCreateInfo shaderModuleCreateInfo = {
 		.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
@@ -21,11 +19,7 @@ GraphicsPipelineResult createGraphicsPipeline(VkDevice device, Swapchain* swapch
 		.codeSize = bytecodeSize,
 		.pCode = bytecode
 	};
-	VkResult csmRes = vkCreateShaderModule(device, &shaderModuleCreateInfo, NULL, &(pipeline->shaderModule));
-	if (csmRes != VK_SUCCESS) {
-		log_fail("Failed to create shader module\n");
-		return GRAPHICS_PIPELINE_FAILURE;
-	}
+	vkCreateShaderModule(device, &shaderModuleCreateInfo, NULL, &(pipeline->shaderModule));
 	free(bytecode);
 
 
@@ -138,11 +132,7 @@ GraphicsPipelineResult createGraphicsPipeline(VkDevice device, Swapchain* swapch
 		.pushConstantRangeCount = 0,
 		.pPushConstantRanges = NULL
 	};
-	VkResult cplRes = vkCreatePipelineLayout(device, &layoutCreateInfo, NULL, &(pipeline->layout));
-	if (cplRes != VK_SUCCESS) {
-		log_fail("Pipeine layout creation failure\n");
-		return GRAPHICS_PIPELINE_FAILURE;
-	}
+	vkCreatePipelineLayout(device, &layoutCreateInfo, NULL, &(pipeline->layout));
 
 	// This enabled dynamic rendering for the pipeline without Vulkan throwing a fit
 	const VkPipelineRenderingCreateInfo renderingCreateInfo = {
@@ -176,14 +166,8 @@ GraphicsPipelineResult createGraphicsPipeline(VkDevice device, Swapchain* swapch
 		.subpass = 0,
 		.basePipelineHandle = NULL,
 	};
+	vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, NULL, &(pipeline->handle));
 
-
-	VkResult cgpRes = vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, NULL, &(pipeline->handle));
-	if (cgpRes != VK_SUCCESS) {
-		log_fail("Graphics pipeline creation failed\n");
-		return GRAPHICS_PIPELINE_FAILURE;
-	}
 
 	log_ok("Graphics pipeline has been created\n");
-	return GRAPHICS_PIPELINE_SUCCESS;
 }
