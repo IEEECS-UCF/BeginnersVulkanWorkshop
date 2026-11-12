@@ -1,14 +1,14 @@
 #include "commandBuffer.h"
 #include "helpers/log.h"
 #include "swapchain.h"
-#include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
-CommandBufResult createCommandPool(VkDevice device, uint32_t queueIndex, VkCommandPool* commandPool) {
-	if (!device) {
-		log_warn("Command pool creator cannot detect a logical device\n");
-		return COMMAND_POOL_INPUTS_UNINITIALIZED;
-	}
+
+void createCommandPool(VkDevice device, uint32_t queueIndex, VkCommandPool* commandPool) {
+	if (!device) { log_warn("Skipping creating command pool due to lack of logical device\n"); return; }
+
+	// -----------------------------------------------
+	// Create the command pool from the queue family
+	// -----------------------------------------------
 
 	const VkCommandPoolCreateInfo createInfo = {
 		.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
@@ -16,23 +16,18 @@ CommandBufResult createCommandPool(VkDevice device, uint32_t queueIndex, VkComma
 		.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, // Allows for a new command buffer recording every frame
 		.queueFamilyIndex = queueIndex
 	};
-
-	const VkResult res = vkCreateCommandPool(device, &createInfo, NULL, commandPool);
-	if (res != VK_SUCCESS) {
-		*commandPool = NULL;
-		log_fail("Unable to create command pool for index %d\n", queueIndex);
-		return COMMAND_POOL_FAILURE;
-	}
+	vkCreateCommandPool(device, &createInfo, NULL, commandPool);
 
 	log_ok("Command pool has been created\n");
-	return COMMAND_POOL_SUCCESS;
 }
 
-CommandBufResult createCommandBuffer(VkDevice device, VkCommandPool commandPool, VkCommandBuffer *commandBuffer) {
-	if (!commandBuffer) {
-		log_warn("Command buffer creator cannot detect a command pool\n");
-		return COMMAND_BUFFER_INPUTS_UNINITIALIZED;
-	}
+
+void createCommandBuffer(VkDevice device, VkCommandPool commandPool, VkCommandBuffer *commandBuffer) {
+	if (!commandPool) { log_warn("Skipping creating command buffer due to lack of command pool\n"); return; }
+
+	// -------------------------------------------------
+	// Allocate the command buffer on the command pool
+	// -------------------------------------------------
 
 	const VkCommandBufferAllocateInfo allocateInfo = {
 		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
@@ -41,19 +36,12 @@ CommandBufResult createCommandBuffer(VkDevice device, VkCommandPool commandPool,
 		.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
 		.commandBufferCount = 1
 	};
-	const VkResult res = vkAllocateCommandBuffers(device, &allocateInfo, commandBuffer);
-	if (res != VK_SUCCESS) {
-		*commandBuffer = NULL;
-		log_fail("Command buffer allocation failed\n");
-		return COMMAND_BUFFER_ALLOC_FAIL;
-	}
+	vkAllocateCommandBuffers(device, &allocateInfo, commandBuffer);
 
 	log_ok("Command buffer has been allocated\n");
-	return COMMAND_BUFFER_SUCCESS;
 }
 
 
-//
 static void transitionImageLayout(
 		VkCommandBuffer commandBuffer,
 		uint32_t imageIndex,
@@ -102,9 +90,11 @@ static void transitionImageLayout(
 }
 
 
-// 
-CommandBufResult recordCommandBuffer(VkCommandBuffer commandBuffer, Swapchain swapchain, uint32_t imageIndex, VkPipeline graphicsPipeline) {
-	VkResult res = VK_SUCCESS;
+void recordCommandBuffer(VkCommandBuffer commandBuffer, Swapchain swapchain, uint32_t imageIndex, VkPipeline graphicsPipeline) {
+
+	// -------------------------------------------
+	// Indicate beginning of full command buffer
+	// -------------------------------------------
 
 	const VkCommandBufferBeginInfo beginInfo = {
 		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -112,12 +102,11 @@ CommandBufResult recordCommandBuffer(VkCommandBuffer commandBuffer, Swapchain sw
 		.flags = 0,
 		.pInheritanceInfo = NULL
 	};
-	res = vkBeginCommandBuffer(commandBuffer, &beginInfo);
-	if (res != VK_SUCCESS) {
-		log_fail("Beginning command buffer recording failed\n");
-		return COMMAND_BUFFER_BEGIN_FAIL;
-	}
+	vkBeginCommandBuffer(commandBuffer, &beginInfo);
 
+	// -------------------------------------
+	// Prepare how image should be treated
+	// -------------------------------------
 
 	transitionImageLayout(
 			commandBuffer,
@@ -130,6 +119,10 @@ CommandBufResult recordCommandBuffer(VkCommandBuffer commandBuffer, Swapchain sw
 			VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
 			VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT
 	);
+
+	// --------------------------------------------------------------------------
+	// Specify how this run of rendering should behave with repect to the image
+	// --------------------------------------------------------------------------
 
 	VkClearValue clearColor = { .color = { .float32 = {0.0f, 0.0f, 0.0f, 1.0f} } };
 	VkRenderingAttachmentInfo attachmentInfo = {
@@ -154,10 +147,20 @@ CommandBufResult recordCommandBuffer(VkCommandBuffer commandBuffer, Swapchain sw
 		.pStencilAttachment = NULL
 	};
 
+	// --------------------------------------------
+	// Startup the rendering system on a pipeline
+	// --------------------------------------------
+
 	vkCmdBeginRendering(commandBuffer, &renderingInfo);
-
-
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
+
+	// --------------------------------------------
+	// Setup dynamic state (viewport and scissor)
+	// --------------------------------------------
+
+	// ----- Viewport -----
+
 	VkViewport viewport = {
 		.x = 0.0f, .y = 0.0f,
 		.width = (float)swapchain.extent.width,
@@ -166,11 +169,20 @@ CommandBufResult recordCommandBuffer(VkCommandBuffer commandBuffer, Swapchain sw
 	};
 	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
+	// ----- Scissor -----
+
 	VkRect2D scissor = { .offset = {0,0}, swapchain.extent};
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+	// ----------
+	// Draw it!
+	// ----------
+
 	vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
+	// -------------------------------
+	// Close out this command buffer
+	// -------------------------------
 
 	vkCmdEndRendering(commandBuffer);
 
@@ -186,13 +198,5 @@ CommandBufResult recordCommandBuffer(VkCommandBuffer commandBuffer, Swapchain sw
 			VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT
 	);
 
-	res = vkEndCommandBuffer(commandBuffer);
-	if (res != VK_SUCCESS) {
-		log_fail("Ending of command buffer encountered error\n");
-		return COMMAND_BUFFER_END_FAIL;
-	}
-
-	return COMMAND_BUFFER_SUCCESS;
+	vkEndCommandBuffer(commandBuffer);
 }
-
-

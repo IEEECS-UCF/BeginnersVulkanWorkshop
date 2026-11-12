@@ -24,6 +24,7 @@ typedef struct {
 	VkSurfaceFormatKHR surfaceFormat;
 	VkExtent2D extent;
 } Swapchain;
+#define EMPTY_SWAPCHAIN_OBJECT (Swapchain){NULL, {0, NULL, NULL}, {0, 0}, {0,0}}
 
 
 SwapchainResult createSwapchain(VkPhysicalDevice physicalDevice, VkDevice logicalDevice, VkSurfaceKHR surface, GLFWwindow* window, Swapchain* swapchain);

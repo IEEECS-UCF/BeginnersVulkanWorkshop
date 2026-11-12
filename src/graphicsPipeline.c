@@ -2,9 +2,12 @@
 #include "helpers/fileio.h"
 #include "helpers/log.h"
 #include <stdlib.h>
-#include <vulkan/vulkan_core.h>
 
-GraphicsPipelineResult createGraphicsPipeline(VkDevice device, Swapchain* swapchain, VkPipeline* graphicsPipeline) {
+void createGraphicsPipeline(VkDevice device, Swapchain* swapchain, GraphicsPipeline* pipeline) {
+	// Guard for when progress has not reached this point
+	if (device == NULL || swapchain->handle == NULL) { return; }
+
+
 	size_t bytecodeSize = 0;
 	uint32_t* bytecode = readShaderBytecode("shaders/byte/tri.spv", &bytecodeSize);
 
@@ -15,8 +18,7 @@ GraphicsPipelineResult createGraphicsPipeline(VkDevice device, Swapchain* swapch
 		.codeSize = bytecodeSize,
 		.pCode = bytecode
 	};
-	VkShaderModule shaderModule;
-	vkCreateShaderModule(device, &shaderModuleCreateInfo, NULL, &shaderModule);
+	vkCreateShaderModule(device, &shaderModuleCreateInfo, NULL, &(pipeline->shaderModule));
 	free(bytecode);
 
 
@@ -25,7 +27,7 @@ GraphicsPipelineResult createGraphicsPipeline(VkDevice device, Swapchain* swapch
 		.pNext = NULL,
 		.flags = 0,
 		.stage = VK_SHADER_STAGE_VERTEX_BIT,
-		.module = shaderModule,
+		.module = pipeline->shaderModule,
 		.pName = "vertMain",
 		.pSpecializationInfo = NULL
 	};
@@ -35,7 +37,7 @@ GraphicsPipelineResult createGraphicsPipeline(VkDevice device, Swapchain* swapch
 		.pNext = NULL,
 		.flags = 0,
 		.stage = VK_SHADER_STAGE_FRAGMENT_BIT,
-		.module = shaderModule,
+		.module = pipeline->shaderModule,
 		.pName = "fragMain",
 		.pSpecializationInfo = NULL
 	};
@@ -129,8 +131,7 @@ GraphicsPipelineResult createGraphicsPipeline(VkDevice device, Swapchain* swapch
 		.pushConstantRangeCount = 0,
 		.pPushConstantRanges = NULL
 	};
-	VkPipelineLayout pipelineLayout = NULL;
-	vkCreatePipelineLayout(device, &layoutCreateInfo, NULL, &pipelineLayout);
+	vkCreatePipelineLayout(device, &layoutCreateInfo, NULL, &(pipeline->layout));
 
 	// This enabled dynamic rendering for the pipeline without Vulkan throwing a fit
 	const VkPipelineRenderingCreateInfo renderingCreateInfo = {
@@ -159,15 +160,13 @@ GraphicsPipelineResult createGraphicsPipeline(VkDevice device, Swapchain* swapch
 		.pDepthStencilState = NULL,
 		.pColorBlendState = &colorBlendingCreateInfo,
 		.pDynamicState = &dynamicStateCreateInfo,
-		.layout = pipelineLayout,
+		.layout = pipeline->layout,
 		.renderPass = NULL,
 		.subpass = 0,
 		.basePipelineHandle = NULL,
 	};
+	vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, NULL, &(pipeline->handle));
 
-
-	vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, NULL, graphicsPipeline);
 
 	log_ok("Graphics pipeline has been created\n");
-	return GRAPHICS_PIPELINE_SUCCESS;
 }

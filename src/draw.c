@@ -1,9 +1,8 @@
 #include "draw.h"
 #include "commandBuffer.h"
 #include "helpers/log.h"
-#include <assert.h>
 #include <stdint.h>
-#include <vulkan/vulkan_core.h>
+#include <stdlib.h>
 
 
 void createSynchronizationObjects(VkDevice device, SyncObjects *objects, uint32_t numImages) {
