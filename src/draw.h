@@ -16,7 +16,7 @@ typedef struct {
 void createSynchronizationObjects(VkDevice device, SyncObjects* objects, uint32_t numImages);
 
 
-void drawFrame(VkDevice device, SyncObjects *sync, Swapchain swapchain, VkCommandBuffer commandBuffer, VkQueue graphicsQueue , VkPipeline graphicsPipeline);
+void drawFrame(VkDevice device, SyncObjects sync, Swapchain swapchain, VkCommandBuffer commandBuffer, VkQueue graphicsQueue , VkPipeline graphicsPipeline);
 
 
 #endif

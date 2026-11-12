@@ -3,7 +3,7 @@ include(cmake/SlangCompile.cmake)
 
 project(VulkanWorkshop)
 
-set(CMAKE_C_FLAGS_DEBUG "-Wall -Wextra -Wpedantic -Wcast-align -Wconversion -g")
+set(CMAKE_C_FLAGS_DEBUG "-Wall -Wextra -Wcast-align -Wconversion -g")
 
 # If using Clangd, will play nice
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) 

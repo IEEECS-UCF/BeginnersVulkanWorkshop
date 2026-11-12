@@ -83,12 +83,13 @@ int main(void) {
 	// Primary 'game' loop (logic, rendering, input, etc)
 	// --------------------------------------------------
 	
+	// Cheeky break to only draw one frame
 	while (!windowShouldClose(window)) {
-		//drawFrame(device, &sync, swapchain, commandBuffer, graphicsQueue, graphicsPipeline.handle);
+		drawFrame(device, sync, swapchain, commandBuffer, graphicsQueue, graphicsPipeline.handle);
 
 		// Close events, input, etc
 		windowPollEvents();
-		drawFrame(device, &sync, swapchain, commandBuffer, graphicsQueue, graphicsPipeline.handle);
+		break;
 	}
 
 
@@ -96,7 +97,7 @@ int main(void) {
 	// Closing out everything nice and cleanly
 	// --------------------------------------------------
 	
-	vkDeviceWaitIdle(device); // Ensure work has completed so we're not bailing out mid-GPU-operation
+	if (device) { vkDeviceWaitIdle(device); } // Ensure work has completed so we're not bailing out mid-GPU-operation
 	destroyAll(window, instance, debugMessenger, device, surface, swapchain, graphicsPipeline, commandPool, sync);
 	return 0;
 }
