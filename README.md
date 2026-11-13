@@ -30,12 +30,15 @@ Windows has its own C compiler MSVC, but due to a myriad of reasons it has not b
 #### Linux
 Both compilers are likely available through your distriubutions preffered package manager, please consult it's documentation on proper installation.
 
+### Vulkan SDK
+LunarG provides the Vulkan SDK for the three major platforms, Windows, Linux, and MacOS. We have confirmed this project working in the first two, but were unable to verify MacOS having a smooth experience (but if you can get it to work awesome!). Follow their download instructions here [https://vulkan.lunarg.com/doc/view/latest/windows/getting_started.html] and the download page itself here [https://vulkan.lunarg.com/sdk/home]. Follow the instructions for your OS, and make sure to have both Validation Layers and the Slang compiler installed. The internet, chatbots, and if a UCF student the running officer can help if issues occur.
+
 ### CMake
 CMake is a tool for organizing the compiling of large C/C++ projects, install instructions are similar to that of your C compiler, [MSYS2](https://www.msys2.org/docs/cmake/) for Windows, package manager for Linux.  
 __Needed commands are here (if your editor environemnt doesn't handle CMake itself), at the directory where you git clone'd__
 ```
 mkdir build
-cmake -G [your installed generator] -DCMAKE_BUILD_DEBUG -B build
+cmake -G [your installed generator] -DCMAKE_BUILD_TYPE=Debug -B build
 ```
 If you want to take it on a test ride (which I reccomend to make sure everyhting has worked [Install Vulkan first!]), do this
 ```
@@ -43,9 +46,6 @@ cmake --build build
 ./build/VulkanWorkshop
 ```
 And it should run no problem!
-
-### Vulkan SDK
-LunarG provides the Vulkan SDK for the three major platforms, Windows, Linux, and MacOS. We have confirmed this project working in the first two, but were unable to verify MacOS having a smooth experience (but if you can get it to work awesome!). Follow their download instructions here [https://vulkan.lunarg.com/doc/view/latest/windows/getting_started.html] and the download page itself here [https://vulkan.lunarg.com/sdk/home]. Follow the instructions for your OS, and make sure to have both Validation Layers and the Slang compiler installed. The internet, chatbots, and if a UCF student the running officer can help if issues occur.
 
 --- 
 *This work was originally compiled and presented by officer Harrison Hilpert*
