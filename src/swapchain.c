@@ -11,6 +11,7 @@ static uint32_t minImageCountSelect(VkSurfaceCapabilitiesKHR capabilities);
 
 
 void createSwapchain(VkPhysicalDevice physicalDevice, VkDevice logicalDevice, VkSurfaceKHR surface, GLFWwindow* window, Swapchain* swapchain) {
+	if (!logicalDevice) { log_warn("Skipping creating swapchain due to lack of needed inputs\n"); return;}
 	
 	// ----------------------------------------
 	// Aquire the capabilities of the surface
