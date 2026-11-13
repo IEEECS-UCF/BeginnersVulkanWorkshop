@@ -7,12 +7,18 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <vulkan/vulkan_core.h>
+
 
 static VkResult validateExtensions(uint32_t count, const char* const* extensions);
 static VkResult validateLayers(uint32_t count, const char** layers);
 
+
 void createInstance(VkInstance* instance) {
+
+	// -----------------------
+	// Spec application info
+	// -----------------------
+
 	// Describes the program in broad strokes to the driver for it to maybe do some optimizations
 	const VkApplicationInfo appInfo = {
 		.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -25,6 +31,10 @@ void createInstance(VkInstance* instance) {
 	};
 
 
+	// ----------------------------------------------------
+	// Describe, then check, required instance extensions
+	// ----------------------------------------------------
+
 	// Extensions defined by us to need
 	const char* additionalExtensions[1] = {
 		VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
@@ -34,7 +44,6 @@ void createInstance(VkInstance* instance) {
 	const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&extensionCount);
 	uint32_t allocCount = extensionCount + (sizeof(additionalExtensions) / sizeof(char*));
 	const char** extensions = (const char* *)malloc(sizeof(char*) * allocCount);
-	assert(extensions != NULL);
 	memcpy((void*)extensions, glfwExtensions, extensionCount * sizeof(char*)); // Move all glfw required extensions into the final array
 	memcpy((void*)(extensions + extensionCount), additionalExtensions, sizeof(additionalExtensions));
 	extensionCount = allocCount;
@@ -43,6 +52,10 @@ void createInstance(VkInstance* instance) {
 		free(extensions);
 		return;
 	}
+
+	// ----------------------------------------------------
+	// Describe, then check, required instance layers
+	// ----------------------------------------------------
 
 	// Layers defined by us to need in execution
 	const char* layers[1] = {
@@ -54,9 +67,17 @@ void createInstance(VkInstance* instance) {
 		return;
 	}
 
+	// ---------------------------------------
+	// Debug messenger for instance creation
+	// ---------------------------------------
 
 	// Keep the hook description in the stack for this sole event
 	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = instanceCreationDebugHook();
+
+	// ---------------------
+	// Create the instance
+	// ---------------------
+
 	// Drilled down list of requirements that will be pulled into the instance by the driver
 	// and other helpers on the system
 	const VkInstanceCreateInfo createInfo = {
@@ -69,14 +90,13 @@ void createInstance(VkInstance* instance) {
 		.enabledExtensionCount = extensionCount,
 		.ppEnabledExtensionNames = extensions,
 	};
+	vkCreateInstance(&createInfo, NULL, instance);
 
-	VkResult res = vkCreateInstance(&createInfo, NULL, instance);
+	// -------------------------
+	// Free up unused resouces
+	// -------------------------
+
 	free(extensions);
-	if (res != VK_SUCCESS) 
-		log_fail("Couldn't create Vulkan instance");
-	else
-		log_ok("Instance has been created\n");
-	return;
 }
 
 
