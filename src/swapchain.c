@@ -2,8 +2,6 @@
 #include "helpers/log.h"
 #include <stdint.h>
 #include <stdlib.h>
-#include <assert.h>
-#include <vulkan/vulkan_core.h>
 
 
 static VkSurfaceFormatKHR surfaceFormatSelect(VkSurfaceFormatKHR* formats, uint32_t numFormats);
@@ -11,107 +9,79 @@ static VkPresentModeKHR swapPresentModeSelect(VkPresentModeKHR* modes, uint32_t 
 static VkExtent2D extentSelect(VkSurfaceCapabilitiesKHR capabilities, GLFWwindow* window);
 static uint32_t minImageCountSelect(VkSurfaceCapabilitiesKHR capabilities);
 
-SwapchainResult createSwapchain(VkPhysicalDevice physicalDevice, VkDevice logicalDevice, VkSurfaceKHR surface, GLFWwindow* window, Swapchain* swapchain) {
-	VkResult res = VK_SUCCESS;
-	VkSurfaceCapabilitiesKHR surfaceCapabilities;
-	res = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCapabilities);
-	if (res != VK_SUCCESS) {
-		log_fail("Unable to get surface capabilities\n");
-		return SWAPCHAIN_MISSING_CAPABILITIES;
-	}
 
-	uint32_t surfaceFormatCount = 0;
-	vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &surfaceFormatCount, NULL);
-	// FIXME: More bugchecks and logging for when this is in the hands of workshop people, we can't assume everyone will have a debugger setup
-	if (surfaceFormatCount < 1) {
-		log_fail("Inadequate number of Surface Format objects\n");
-		return SWAPCHAIN_NOT_ENOUGH_SURFACE_FORMATS;
-	}
-	VkSurfaceFormatKHR* surfaceFormats = (VkSurfaceFormatKHR*)malloc(sizeof(VkSurfaceFormatKHR) * surfaceFormatCount);
-	assert(surfaceFormats != NULL);
-	vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &surfaceFormatCount, surfaceFormats);
+void createSwapchain(VkPhysicalDevice physicalDevice, VkDevice logicalDevice, VkSurfaceKHR surface, GLFWwindow* window, Swapchain* swapchain) {
+	
+	// ----------------------------------------
+	// Aquire the capabilities of the surface
+	// ----------------------------------------
+	
+	
 
-	uint32_t surfacePresentModeCount = 0;
-	vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &surfacePresentModeCount, NULL);
-	assert(surfacePresentModeCount > 0);
-	VkPresentModeKHR* surfacePresentModes = (VkPresentModeKHR*)malloc(sizeof(VkPresentModeKHR) * surfacePresentModeCount);
-	assert(surfacePresentModes != NULL);
-	vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &surfacePresentModeCount, surfacePresentModes);
+	// -----------------------------------
+	// Aquire the formats of the surface
+	// -----------------------------------
 
+	
 
-	swapchain->surfaceFormat = surfaceFormatSelect(surfaceFormats, surfaceFormatCount);
-	swapchain->extent = extentSelect(surfaceCapabilities, window);
+	// -----------------------------------------
+	// Aquire the present modes of the surface
+	// -----------------------------------------
 
+	
 
-	VkSwapchainCreateInfoKHR createInfo = {
-		.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-		.pNext = NULL,
-		.flags = 0, // Nothing ever happens
-		.surface = surface,
-		.minImageCount = minImageCountSelect(surfaceCapabilities),
-		.imageFormat = swapchain->surfaceFormat.format,
-		.imageColorSpace = swapchain->surfaceFormat.colorSpace,
-		.imageExtent = swapchain->extent,
-		.imageArrayLayers = 1, // If we wanted stereo video this would be higher
-		.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-		.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
-		.queueFamilyIndexCount = 0, // Not sharing, so this doesnt matter
-		.pQueueFamilyIndices = NULL, // Still not sharing, we are greedy here
-		.preTransform = surfaceCapabilities.currentTransform,
-		.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
-		.presentMode = swapPresentModeSelect(surfacePresentModes, surfacePresentModeCount),
-		.clipped = VK_TRUE,
-		.oldSwapchain = NULL, // Not an old swapchain on the first create
-	};
+	// ------------------------------
+	// Fill in the swapchain struct
+	// ------------------------------
 
-	vkCreateSwapchainKHR(logicalDevice, &createInfo, NULL, &(swapchain->handle));
-	vkGetSwapchainImagesKHR(logicalDevice, swapchain->handle, &(swapchain->images.num), NULL);
-	swapchain->images.imageHandles = (VkImage*)malloc(sizeof(VkImage) * swapchain->images.num);
-	assert(swapchain->images.imageHandles != NULL);
-	vkGetSwapchainImagesKHR(logicalDevice, swapchain->handle, &(swapchain->images.num), swapchain->images.imageHandles);
+	
 
-	free(surfaceFormats); surfaceFormats = NULL;
-	free(surfacePresentModes); surfacePresentModes = NULL;
+	// -------------------------------
+	// Actually create the swapchain
+	// -------------------------------
+
+	
+
+	// --------------------------
+	// Get the swapchain images
+	// --------------------------
+
+	
+
+	// -----------------------
+	// Free up old resources
+	// -----------------------
+
+	
 
 	log_ok("Initial swapchain has been created\n");
-
-	return SWAPCHAIN_SUCCESS;
 }
 
-SwapchainResult createImageViews(VkDevice device, Swapchain* swapchain) {
-	VkImageViewCreateInfo createInfo = {
-		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-		.pNext = NULL,
-		.flags = 0,
-		.format = swapchain->surfaceFormat.format,
-		.subresourceRange = (VkImageSubresourceRange){
-			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT, 
-			.levelCount = 1, 
-			.layerCount = 1, 
-			.baseArrayLayer = 0, 
-			.baseMipLevel = 0
-		},
-		.components = { // Make sure were just leaving color channels as they should be, but many a funny available here
-			.r = VK_COMPONENT_SWIZZLE_IDENTITY, 
-			.g = VK_COMPONENT_SWIZZLE_IDENTITY, 
-			.b = VK_COMPONENT_SWIZZLE_IDENTITY, 
-			.a = VK_COMPONENT_SWIZZLE_IDENTITY,
-		},
-		.viewType = VK_IMAGE_VIEW_TYPE_2D
-	};
 
-	swapchain->images.viewHandles = (VkImageView*)malloc(sizeof(VkImageView) * swapchain->images.num);
-	assert(swapchain->images.imageHandles != NULL);
+void createImageViews(VkDevice device, Swapchain* swapchain) {
+	if (!swapchain->handle) { log_warn("Skipping creating image views due to lack of swapchain\n"); return;}
 	
-	for (uint32_t i = 0; i < swapchain->images.num; i++) {
-		createInfo.image = swapchain->images.imageHandles[i];
-		vkCreateImageView(device, &createInfo, NULL, &(swapchain->images.viewHandles[i]));
-	}
+	// --------------------------------------
+	// Spec out all image views identically
+	// --------------------------------------
+
+	
+
+	// ----------------------
+	// Allocate the handles
+	// ----------------------
+
+	
+	
+	// --------------------------------------
+	// Actually create them "on" the device
+	// --------------------------------------
+
+	
 
 	log_ok("Swapchain image views have been created\n");
-
-	return SWAPCHAIN_SUCCESS;
 }
+
 
 // Seeks out a SRGB [BGRA ordering] color space, if not present returns the first format available
 static VkSurfaceFormatKHR surfaceFormatSelect(VkSurfaceFormatKHR* formats, uint32_t numFormats) {
@@ -148,7 +118,6 @@ static VkExtent2D extentSelect(VkSurfaceCapabilitiesKHR capabilities, GLFWwindow
 	
 	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
-	assert(width > -1 && height > -1); // Detonate before the casting does
 	return (VkExtent2D){
 		.width = clamp((uint32_t)width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width),
 		.height = clamp((uint32_t)height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height),
@@ -158,7 +127,7 @@ static VkExtent2D extentSelect(VkSurfaceCapabilitiesKHR capabilities, GLFWwindow
 //
 static uint32_t minImageCountSelect(VkSurfaceCapabilitiesKHR capabilities) {
 	// Asks for at least 3 images
-	uint32_t minImageCount = 3u > capabilities.minImageCount ? 3u : capabilities.minImageCount;
+	uint32_t minImageCount = 2u > capabilities.minImageCount ? 2u : capabilities.minImageCount;
 	// Makes sure that the max isn't exceeded, if so set it to the max (accounts for an unbound max)
 	if ((0 < capabilities.maxImageCount) && (capabilities.maxImageCount < minImageCount)) {
 		minImageCount = capabilities.maxImageCount;

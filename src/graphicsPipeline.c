@@ -5,7 +5,8 @@
 
 void createGraphicsPipeline(VkDevice device, Swapchain* swapchain, GraphicsPipeline* pipeline) {
 	// Guard for when progress has not reached this point
-	if (device == NULL || swapchain->handle == NULL) { return; }
+	if (device == NULL || swapchain->handle == NULL) 
+		log_warn("Skipping creating graphics pipeline due to uninitialized inputs\n"); return;
 
 
 	size_t bytecodeSize = 0;

@@ -133,7 +133,7 @@ static void destroyAll(
 	if (pipeline.handle != NULL) 
 		vkDestroyPipeline(logicalDevice, pipeline.handle, NULL);
 
-	if (swapchain.images.imageHandles != NULL) {
+	if (swapchain.images.viewHandles != NULL) {
 		// Images are destroyed with the swapchain, so no destroying them here
 		for (uint32_t i = 0; i < swapchain.images.num; i++) {
 			vkDestroyImageView(logicalDevice, swapchain.images.viewHandles[i], NULL);
