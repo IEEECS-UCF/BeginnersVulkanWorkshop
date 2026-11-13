@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-#include "helpers/log.h"
 
 // Action specific imports, in order of usage
 #include "helpers/window.h"
