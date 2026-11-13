@@ -4,7 +4,6 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <vulkan/vulkan_core.h>
 
 #define SUITABLE 1
 #define UNSUITABLE 0
@@ -15,14 +14,22 @@
 static uint8_t validateDevice(VkPhysicalDevice device);
 
 
-PhysicalResult selectPhysicalDevice(VkInstance instance, VkPhysicalDevice* physicalDevice) {
+void selectPhysicalDevice(VkInstance instance, VkPhysicalDevice* physicalDevice) {
+	if (!instance) { log_warn("\n"); return; }
+
+	// ----------------------
+	// Get physical devices
+	// ----------------------
+	
 	uint32_t numDevices = 0;
 	VkPhysicalDevice* devices = NULL;
 	vkEnumeratePhysicalDevices(instance, &numDevices, NULL);
-
 	devices = (VkPhysicalDevice*)malloc(sizeof(VkPhysicalDevice) * numDevices);
-	assert(devices != NULL);
 	vkEnumeratePhysicalDevices(instance, &numDevices, devices);
+
+	// ----------------------------------------------------------
+	// Check each device and pick the best (first valid) option
+	// ----------------------------------------------------------
 
 	for (uint32_t i = 0; i < numDevices; i++) {
 		// Ensure device has the minimum requirements, skip if it fails
@@ -34,15 +41,27 @@ PhysicalResult selectPhysicalDevice(VkInstance instance, VkPhysicalDevice* physi
 		*physicalDevice = devices[i];
 	}
 
+	// ----------------------------------
+	// Free up resources no longer used
+	// ----------------------------------
+
 	free(devices);
-	return PHYS_NO_SUITABLE_DEVICE;
 }
 
 static uint8_t validateDevice(VkPhysicalDevice device) {
+
+	// -----------------------
+	// Get device properties
+	// -----------------------
+
 	/// Properties check
 	// Basic info about the device like name, API version, 
 	VkPhysicalDeviceProperties properties;
 	vkGetPhysicalDeviceProperties(device, &properties);
+
+	// ---------------
+	// Version check
+	// ---------------
 
 	// We require methods only available in version 1.3 and above, so devices that can't handle those calls are essentially blocks of meaningless silicon to us
 	if (properties.apiVersion < VK_API_VERSION_1_3) {
@@ -50,13 +69,19 @@ static uint8_t validateDevice(VkPhysicalDevice device) {
 		return UNSUITABLE; 
 	}
 
+	// -----------------------------
+	// Get device queue properties
+	// -----------------------------
 
 	/// Scanning queue families for a valid family (supports graphics commands)
 	uint32_t queuePropertiesCount = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(device, &queuePropertiesCount, NULL);
 	VkQueueFamilyProperties* queueProperties = (VkQueueFamilyProperties*)malloc(sizeof(VkQueueFamilyProperties) * queuePropertiesCount);
-	assert(queueProperties != NULL);
 	vkGetPhysicalDeviceQueueFamilyProperties(device, &queuePropertiesCount, queueProperties);
+
+	// --------------------------
+	// Check family is sutiable
+	// --------------------------
 
 	uint8_t validFamily = FALSE;
 	// Fun and fast-ish run through of all the devices, 90% of cases only 1-4 families on a device via trust me bro benchmark
@@ -68,12 +93,10 @@ static uint8_t validateDevice(VkPhysicalDevice device) {
 		return UNSUITABLE;
 	}
 
+	// ---------------------------
+	// Get the device extensions
+	// ---------------------------
 
-	/// Checking all the needed extensions from the device
-	// Names are all known at compile time
-	const char* requiredExtensions[1] = {
-		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-	};
 	// Standard fetching steps
 	uint32_t numExtensions = 0;
 	VkExtensionProperties* extensionProperties = NULL;
@@ -81,12 +104,25 @@ static uint8_t validateDevice(VkPhysicalDevice device) {
 	extensionProperties = (VkExtensionProperties*)malloc(sizeof(VkExtensionProperties) * numExtensions);
 	vkEnumerateDeviceExtensionProperties(device, NULL, &numExtensions, extensionProperties);
 
+
+	// -------------------------------
+	// Perform search for extensions
+	// -------------------------------
+
+	// Names are all known at compile time
+	const char* requiredExtensions[1] = {
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+	};
+
 	ExtensionSearchResult searchRes = searchExtensions(numExtensions, extensionProperties, 1, requiredExtensions);
 	if (searchRes == MISSING_EXTENSIONS) {
 		log_warn("Device \"%s\" is missing required extensions, unsuitable\n", properties.deviceName);
 		return UNSUITABLE;
 	}
 
+	// -----------------------------
+	// Setup all required features
+	// -----------------------------
 
 	/// Checking for all required features of the device, order must be bottom->top to chain pNexts
 	// Device support info specific to the fancy dynamic state extensions
@@ -105,6 +141,11 @@ static uint8_t validateDevice(VkPhysicalDevice device) {
 	VkPhysicalDeviceFeatures2 deviceBaseFeatures;
 	deviceBaseFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
 	deviceBaseFeatures.pNext = &device11Features;
+
+	// ----------------------------
+	// Get and check the features
+	// ----------------------------
+
 	// Fetching from the device
 	vkGetPhysicalDeviceFeatures2(device, &deviceBaseFeatures);
 
@@ -114,8 +155,12 @@ static uint8_t validateDevice(VkPhysicalDevice device) {
 		return UNSUITABLE;
 	}
 
+	// --------------------------
+	// Free up unused resources
+	// --------------------------
 
 	free(queueProperties);
 	free(extensionProperties);
+
 	return SUITABLE;
 }
