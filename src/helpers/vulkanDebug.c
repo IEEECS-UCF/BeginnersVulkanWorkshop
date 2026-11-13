@@ -9,7 +9,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback( VkDebugUtilsMessageSeverity
 
 void setupDebugMessaging(VkInstance instance, VkDebugUtilsMessengerEXT* messenger) {
 	if (!instance) { // For when the instance is undeveloped
-		log_warn("Instance passed to debug messaging uninitalized\n");
+		log_warn("Skipping creating debug messenger due to lack of instance\n");
 		return;
 	}
 

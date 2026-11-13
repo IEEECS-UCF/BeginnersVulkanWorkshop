@@ -41,11 +41,7 @@ int main(void) {
 
 
 	VkSurfaceKHR surface = NULL;
-	if (window && instance && glfwCreateWindowSurface(instance, window, NULL, &surface) != 0) {
-		log_fail("Cannot create window surface\n");
-		destroyAll(window, instance, debugMessenger, NULL, surface, EMPTY_SWAPCHAIN_OBJECT, EMPTY_PIPELINE_OBJECT, NULL, EMPTY_SYNC_OBJECTS);
-		return -1;
-	}
+	if (instance) { glfwCreateWindowSurface(instance, window, NULL, &surface); }
 
 
 	VkPhysicalDevice physicalDevice = NULL;
