@@ -3,15 +3,35 @@ target_sources(VulkanWorkshop
 	# Source files
 	PRIVATE
 		main.c
-		log.c
-		window.c
+		helpers/log.c
+		helpers/window.c
+		helpers/vulkanDebug.c
+		instance.c
+		physicalDevice.c
+		helpers/searching.c
+		logicalDevice.c
+		swapchain.c
+		helpers/fileio.c
+		graphicsPipeline.c
+		commandBuffer.c
+		draw.c
 
 	# Header files
 	PRIVATE
 		FILE_SET internalHeaders
 		TYPE HEADERS
 		FILES
-			log.h
-			window.h
+			helpers/log.h
+			helpers/window.h
+			helpers/vulkanDebug.h
+			instance.h
+			physicalDevice.h
+			helpers/searching.h
+			logicalDevice.h
+			swapchain.h
+			helpers/fileio.h
+			graphicsPipeline.h
+			commandBuffer.h
+			draw.h
 )
 
