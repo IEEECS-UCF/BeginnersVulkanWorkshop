@@ -4,6 +4,6 @@
 #include <stdint.h>
 #include <vulkan/vulkan_core.h>
 
-VkResult createLogicalDevice(VkPhysicalDevice physicalDevice, VkDevice* logicalDevice, VkSurfaceKHR surface, VkQueue* graphicsQueue, uint32_t* graphicsQueueIndex);
+void createLogicalDevice(VkPhysicalDevice physicalDevice, VkDevice* logicalDevice, VkSurfaceKHR surface, VkQueue* graphicsQueue, uint32_t* graphicsQueueIndex);
 
 #endif
